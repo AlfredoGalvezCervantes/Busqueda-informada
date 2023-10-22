@@ -1,0 +1,75 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <unordered_map>
+#include <limits>
+
+using namespace std;
+
+// Definición de una estructura para representar un nodo en el grafo
+struct Node {
+    int state;
+    int cost;
+    int heuristic;
+};
+
+// Función heurística (cambiar según el problema)
+int heuristic(int state, int goal) {
+    // Esta es una función heurística de ejemplo que simplemente cuenta la diferencia entre el estado y el objetivo.
+    return abs(state - goal);
+}
+
+// Función para realizar la búsqueda A*
+int aStarSearch(int start, int goal) {
+    priority_queue<Node, vector<Node>, function<bool(Node, Node)>> openList(
+        [](Node a, Node b) {
+            return (a.cost + a.heuristic) > (b.cost + b.heuristic);
+        }
+    );
+    
+    unordered_map<int, int> costMap;
+    
+    Node startNode = {start, 0, heuristic(start, goal)};
+    openList.push(startNode);
+    
+    while (!openList.empty()) {
+        Node current = openList.top();
+        openList.pop();
+        
+        if (current.state == goal) {
+            return current.cost;  // Se encontró el camino al objetivo
+        }
+        
+        if (costMap.find(current.state) != costMap.end() && current.cost >= costMap[current.state]) {
+            continue;  // Ignorar nodos con costos superiores ya en el mapa
+        }
+        
+        costMap[current.state] = current.cost;
+        
+        // Expande los sucesores del nodo actual (cambiar según el problema)
+        for (int neighbor : {current.state - 1, current.state + 1}) {
+            if (neighbor >= 0) {
+                int neighborCost = current.cost + 1;  // Peso unitario de la arista
+                int neighborHeuristic = heuristic(neighbor, goal);
+                openList.push({neighbor, neighborCost, neighborHeuristic});
+            }
+        }
+    }
+    
+    return -1;  // No se encontró un camino al objetivo
+}
+
+int main() {
+    int startNode = 2;  // Nodo de inicio
+    int goalNode = 10;  // Nodo objetivo
+    
+    int result = aStarSearch(startNode, goalNode);
+    
+    if (result != -1) {
+        cout << "Se encontró un camino desde " << startNode << " hasta " << goalNode << " con costo " << result << endl;
+    } else {
+        cout << "No se encontró un camino desde " << startNode << " hasta " << goalNode << endl;
+    }
+    
+    return 0;
+}
