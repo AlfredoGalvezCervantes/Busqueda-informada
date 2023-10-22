@@ -1,0 +1,64 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+// Definición de una estructura para representar un nodo en el grafo
+struct Node {
+    int state;
+    int cost;
+};
+
+// Función heurística (cambiar según el problema)
+int heuristic(int state, int goal) {
+    // Esta es una función heurística de ejemplo que simplemente cuenta la diferencia entre el estado y el objetivo.
+    return abs(state - goal);
+}
+
+// Función para realizar la búsqueda Primero el Mejor
+int bestFirstSearch(int start, int goal) {
+    priority_queue<Node, vector<Node>, function<bool(Node, Node)>> openList(
+        [](Node a, Node b) {
+            return a.cost > b.cost;
+        }
+    );
+    
+    Node startNode = {start, heuristic(start, goal)};
+    openList.push(startNode);
+    
+    while (!openList.empty()) {
+        Node current = openList.top();
+        openList.pop();
+        
+        if (current.state == goal) {
+            return current.cost;  // Se encontró el camino al objetivo
+        }
+        
+        // Expande los sucesores del nodo actual (cambiar según el problema)
+        for (int neighbor : {current.state - 1, current.state + 1}) {
+            if (neighbor >= 0) {
+                int cost = current.cost + heuristic(neighbor, goal);
+                openList.push({neighbor, cost});
+            }
+        }
+    }
+    
+    return -1;  // No se encontró un camino al objetivo
+}
+
+int main() {
+    int startNode = 2;  // Nodo de inicio
+    int goalNode = 10;  // Nodo objetivo
+    
+    int result = bestFirstSearch(startNode, goalNode);
+    
+    if (result != -1) {
+        cout << "Se encontró un camino desde " << startNode << " hasta " << goalNode << " con costo " << result << endl;
+    } else {
+        cout << "No se encontró un camino desde " << startNode << " hasta " << goalNode << endl;
+    }
+    
+    return 0;
+}
